@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CS61A</title>
+    <link rel="icon" href="/lambda.png/" type="image/png"/>
+    <script src="/jquery-3.3.1.min.js"></script>
+    
+    <script src="/vex-4.0.1/dist/js/vex.combined.min.js"></script>
+    <script>vex.defaultOptions.className = 'vex-theme-os'</script>
+    <link rel="stylesheet" href="/vex-4.0.1/dist/css/vex.css" />
+    <link rel="stylesheet" href="/vex-4.0.1/dist/css/vex-theme-os.css" />
+    
+    <link rel="stylesheet" href="/fontawesome/css/all.min.css"/>
+    
+    <link rel="stylesheet" href="/index.css"/>
+    <script src="/index.js"></script>
+  </head>
+  <body>
+    <div id="header">
+      <h2 id="equation">
+        <span id="equation-text"> loading equation... </span></h2>  
+      <div class="buttons">
+        <div class="circle-button color1" onclick="domainInterface()">
+          <i class="fas fa-sliders-h"></i>
+          <span class="tooltiptext">Change domain</span>
+        </div>
+        <div class="circle-button color2" onclick="zoomIn()">
+          <i class="fas fa-search-plus"></i>
+          <span class="tooltiptext">Zoom in</span>
+        </div>
+        <div class="circle-button color3" onclick="zoomOut()">
+          <i class="fas fa-search-minus"></i>
+          <span class="tooltiptext">Zoom Out</span>
+        </div>
+        <div class="circle-button color4" onclick="equationInterface()">
+          <i class="fas fa-edit"></i>
+          <span class="tooltiptext">Input equation</span>
+        </div>
+        <div class="circle-button color1" onclick="getEquation()">
+          <i class="fas fa-database"></i>
+          <span class="tooltiptext">Equation from database</span>
+        </div>
+        <div class="circle-button color2" onclick="getEquation('/random')">
+          <i class="fas fa-dice"></i>
+          <span class="tooltiptext">Random equation</span>
+        </div>
+        <div class="circle-button color3" id="add" onclick="addEquation()" style="display: none">
+          <i class="fas fa-plus"></i>
+          <span class="tooltiptext">Add equation to database</span>
+        </div>
+        <div class="circle-button color3" id="remove" onclick="removeEquation(currentEquation)">
+          <i class="fas fa-minus"></i>
+          <span class="tooltiptext">Remove equation from database</span>
+        </div>
+        <div class="circle-button color4" onclick="listEquations()">
+          <i class="fa fa-list-ol"></i>
+          <span class="tooltiptext">Get saved equations</span>
+        </div>
+        <div class="circle-button color1" onclick="toggleInspect(this)">
+          <i class="fab fa-searchengin"></i>
+          <span class="tooltiptext">Start inspecting points</span>
+        </div>
+      </div>
+    </div>
+    <canvas id="slope-field"></canvas>
+    <div id="toast-message"></div>
+    <span class="tooltiptext inspect-tooltip"></span>
+  </body>
+</html>

@@ -1,0 +1,212 @@
+body{
+  font-family: sans-serif;
+  padding: 0px;
+  margin: 0px;
+  overflow: hidden;
+  color: #555555;
+  background-color: #ddd;
+}
+
+#equation{
+  text-align: center;
+  margin: 0px;
+  padding: 5px;
+  background-color: #eee
+}
+
+.buttons{
+  width:100%;
+  padding:5px;
+  text-align: center
+}
+
+.circle-button{
+  display: inline-block;
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  margin-right: 5px;
+  font-size: 20px;
+  position: relative;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+.color1{
+  background-color: #e24e42;
+  border-right: 0px;
+}
+
+.color1:hover{
+  background-color: #E77267;
+}
+
+.color1:active{
+  background-color: #CB473B;
+}
+
+.color2{
+  background-color: #eb6e80;
+  border-right: 0px;
+}
+
+.color2:hover{
+  background-color: #EF8B99
+}
+
+.color2:active{
+  background-color: #D36373
+}
+
+.color3{
+  background-color: #008f95;
+  border-right: 0px;
+}
+
+.color3:hover{
+  background-color: #33A6AA
+}
+
+.color3:active{
+  background-color: #008186
+}
+
+.color4{
+  background-color: #e9b000;
+}
+
+.color4:hover{
+  background-color: #EDBF33
+}
+
+.color4:active{
+  background-color: #D19D00
+}
+
+#toast-message {
+    visibility: hidden;
+    background-color: #333; 
+    color: #fff; 
+    text-align: center;
+    z-index: 1112;
+    border-radius: 2px; 
+    padding: 16px;
+    position: fixed; 
+    bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#toast-message.show {
+    visibility: visible;
+   -webkit-animation: fadein 0.5s;
+   animation: fadein 0.5s;
+}
+#toast-message.hide{
+  
+ -webkit-animation: fadeout 0.5s;
+ animation: fadeout 0.5s;
+}
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+.vex{
+  overflow: hidden;
+}
+
+.remove-button{
+  color: white!important;
+  background-color: #ff7777!important;
+}
+
+.cyan-button{
+  background-color: #55bbff;
+  color: white;
+}
+
+.tooltiptext {
+    width: 120px;
+    top: 100%;
+    left: 50%; 
+    margin-left: -65px;
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    border: 0.5px solid white;
+    text-align: center;
+    padding: 5px;
+    border-radius: 6px;
+    position: absolute;
+    font-size: 15px;
+    z-index: 2;
+}
+.tooltiptext::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%; 
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #333 transparent;
+}
+.inspect-tooltip::after {
+    top: 100%; 
+    border-color: white transparent transparent transparent;
+}
+.inspect-tooltip{
+  width: 160px;
+  margin-left: -80px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.left-tooltip, .right-tooltip{
+  margin-left: 0px;
+}
+.left-tooltip::after {
+  top: calc(50% - 5px);
+  left: calc(0% - 5px); 
+  border-color: transparent white transparent transparent;
+}
+.right-tooltip::after {
+  top: calc(50% - 5px);
+  left: calc(100% + 5px); 
+  border-color: transparent transparent transparent white;
+}
+.bottom-tooltip::after {
+  top: calc(0% - 10px); 
+  border-color: transparent transparent white transparent;
+}
+
+@media (max-width: 650px){
+  body{
+    font-size: 80%;
+  }
+  .circle-button{
+      width: 33px;
+      height: 33px;
+      font-size: 14px;
+      margin-right: 2.5px;
+  }
+}
