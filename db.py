@@ -1,59 +1,57 @@
-import sqlite3
-from sqlite3 import Error
+from sqlalchemy import create_engine
 from util import *
 
 file = './equations.db'
 
-def create_connection(db_file):
+SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+    username="NaomiSagan",
+    password="cs61@fall2018",
+    hostname="NaomiSagan.mysql.pythonanywhere-services.com",
+    databasename="NaomiSagan$equations"
+)
+
+engine= create_engine(SQLALCHEMY_DATABASE_URI)
+
+
+def create_connection():
     """ create a database connection to the SQLite database
         specified by the db_file
     :param db_file: database file
     :return: Connection object or None
     """
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-    return None
+    return engine.connect()
 
 def format_all():
+    con = create_connection();
     for row in get_equations():
-        cur.execute('UPDATE samples SET equation=? WHERE equation=?;', (format_expr(row), row))
-        conn.commit()
-    conn.close()
+        conn.execute('UPDATE samples SET equation=%s WHERE equation=%s;', (format_expr(row), row))
+    con.close()
 
 def insert_equation(expr):
-    expr = "'" + expr + "'"
-    conn = create_connection(file)
-    cur = conn.cursor()
-    cur.execute('SELECT equation FROM samples WHERE equation={}'.format(expr))
-    if not cur.fetchall():
-        cur.execute('INSERT INTO samples VALUES ({})'.format(expr))
-        conn.commit()
-        conn.close()
+    con = create_connection()
+    result = con.execute('SELECT equation FROM samples WHERE equation=%s;', expr)
+    if not result.fetchall():
+        con.execute('INSERT INTO samples VALUES (%s)', expr)
+        con.close()
         return True
-    conn.close()
+    con.close()
     return False
 
 def get_equations():
-    conn = create_connection(file)
-    cur = conn.cursor()
-    cur.execute('SELECT equation FROM samples;');
-    return [row[0] for row in cur.fetchall()]
-    conn.close()
+    con = create_connection()
+    result = con.execute('SELECT equation FROM samples;');
+    return [row[0] for row in result]
+    con.close()
 
 def remove_equation(expr):
-    expr = "'" + expr + "'"
-    conn = create_connection(file)
-    cur = conn.cursor()
-    cur.execute('DELETE FROM samples WHERE equation={}'.format(expr))
-    conn.commit()
+    con = create_connection()
+    con.execute('DELETE FROM samples WHERE equation=%s', expr)
+    con.close()
     return True;
 
 def in_db(expr):
-    expr = "'" + expr + "'"
-    conn = create_connection(file)
-    cur = conn.cursor()
-    cur.execute('SELECT equation FROM samples WHERE equation={}'.format(expr))
-    return bool(cur.fetchall())
+    con = create_connection()
+    print(expr)
+    result = con.execute('SELECT equation FROM samples WHERE equation=%s', expr)
+    con.close()
+    return bool(result.fetchall())

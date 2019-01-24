@@ -1,3 +1,12 @@
+#wrapper
+{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    position: fixed;
+}
 body{
   font-family: sans-serif;
   padding: 0px;
@@ -17,6 +26,7 @@ body{
 .buttons{
   width:100%;
   padding:5px;
+  padding-bottom: 0px;
   text-align: center
 }
 
@@ -24,6 +34,7 @@ body{
   display: inline-block;
   color: white;
   cursor: pointer;
+  margin-bottom: 5px;
   border-radius: 50%;
   margin-right: 5px;
   font-size: 20px;
@@ -88,13 +99,13 @@ body{
 
 #toast-message {
     visibility: hidden;
-    background-color: #333; 
-    color: #fff; 
+    background-color: #333;
+    color: #fff;
     text-align: center;
     z-index: 1112;
-    border-radius: 2px; 
+    border-radius: 2px;
     padding: 16px;
-    position: fixed; 
+    position: fixed;
     bottom: 30px; /* 30px from the bottom */
 }
 
@@ -105,13 +116,13 @@ body{
    animation: fadein 0.5s;
 }
 #toast-message.hide{
-  
+
  -webkit-animation: fadeout 0.5s;
  animation: fadeout 0.5s;
 }
 /* Animations to fade the snackbar in and out */
 @-webkit-keyframes fadein {
-    from {bottom: 0; opacity: 0;} 
+    from {bottom: 0; opacity: 0;}
     to {bottom: 30px; opacity: 1;}
 }
 
@@ -121,7 +132,7 @@ body{
 }
 
 @-webkit-keyframes fadeout {
-    from {bottom: 30px; opacity: 1;} 
+    from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
 }
 
@@ -147,7 +158,7 @@ body{
 .tooltiptext {
     width: 120px;
     top: 100%;
-    left: 50%; 
+    left: 50%;
     margin-left: -65px;
     visibility: hidden;
     background-color: #333;
@@ -163,7 +174,7 @@ body{
 .tooltiptext::after {
     content: " ";
     position: absolute;
-    bottom: 100%; 
+    bottom: 100%;
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
@@ -171,7 +182,7 @@ body{
     border-color: transparent transparent #333 transparent;
 }
 .inspect-tooltip::after {
-    top: 100%; 
+    top: 100%;
     border-color: white transparent transparent transparent;
 }
 .inspect-tooltip{
@@ -186,17 +197,21 @@ body{
 }
 .left-tooltip::after {
   top: calc(50% - 5px);
-  left: calc(0% - 5px); 
+  left: calc(0% - 5px);
   border-color: transparent white transparent transparent;
 }
 .right-tooltip::after {
   top: calc(50% - 5px);
-  left: calc(100% + 5px); 
+  left: calc(100% + 5px);
   border-color: transparent transparent transparent white;
 }
 .bottom-tooltip::after {
-  top: calc(0% - 10px); 
+  top: calc(0% - 10px);
   border-color: transparent transparent white transparent;
+}
+
+#download{
+    display: none;
 }
 
 @media (max-width: 650px){

@@ -2,19 +2,32 @@ var w = 0;
 var h = 0;
 var canvas;
 var ctx;
-var colors = ["blue", "fuchsia", "chartreuse", "white", "yellow", "cyan", "red", "orange", "purple", "grey"];
+var colors = [[0, 0, 1], [1, 0, 1], [0.498, 1, 0], [1, 1, 1], [1, 1, 0], [0, 1, 1], [1, 0, 0], [0.647, 1, 0], [0.502, 0, 0.502], [0.502, 0.502, 0.502]];
 var domain = [[-2, 2, 0.02], [-2, 2, 0.02]];//(start, end, step)
 var currentEquation = null;
+var currentArray = null;
 var resizeOk = true;
 var inspecting = false;
 var toastTimeout = null
+
+var colorSchemes = {"Default": {name: "Default", description: "The colors mean nothing", func: getColor},
+    "Red Shift": {name: "Red Shift", description: "Steeper slopes are red-shifted", func: redShift},
+    "Blue Shift": {name: "Blue Shift", description: "Steeper slopes are blue-shifted", func: blueShift},
+    "Green Shift": {name: "Green Shift", description: "Steeper slopes are green-shifted", func: greenShift},
+    "Highlight": {name: "Highlight", description: "Steeper slopes are brighter", func: highlightColor},
+    "Dim": {name: "Dim", description: "Steeper slopes are darker", func: dimColor}
+};
+
+var colorIndex = "Default";
+
+var axes = true;
 
 $(window).on('load', function(){
   canvas = $("#slope-field")[0];
   ctx = canvas.getContext("2d");
   setSizing();
   setDomain();
-  
+
   $('.circle-button').on('mouseenter', function(){
     $(this).find('.tooltiptext').css('visibility', 'visible');
   });
@@ -33,10 +46,22 @@ $(window).on('resize', function(){
 });
 
 function setSizing(){
+  buttonSizing();
   w = $(window).width();
   h = $(window).height() - $("#header").height();
   canvas.height = h;
   canvas.width = w;
+}
+
+function buttonSizing(){
+  $(".buttons br").remove();
+  var divHeight = $(".buttons").height();
+  var buttonHeight = $(".circle-button").height() + 5;
+  var lines = Math.round((divHeight - 5)/buttonHeight);
+  var buttons =  $('.buttons')[0].children;
+  for (i = 1; i < lines; i++){
+    $("<br>").insertAfter(buttons[Math.floor(i*buttons.length/lines) - 1]);
+  }
 }
 
 function getEquation(target, eqn){
@@ -51,6 +76,7 @@ function getEquation(target, eqn){
   }).done(function(x){
     $("#equation-text").html("dy/dx = " + x.dydx);
     currentEquation = x.dydx;
+    currentArray = x.slopes;
     makeSlopeField(x.slopes);
     $.ajax({
       url: "/eqn_in_db",
@@ -66,19 +92,22 @@ function getEquation(target, eqn){
         $("#add").css("display", "inline-flex")
       }
     });
+  }).fail(function(error){
+    displayToast("Server Error 😢... Retrying");
+    getEquation(target, eqn);
   });
 }
 
 function dataString(eqn){
   if(eqn){
     return ("x0=" + domain[0][0] + "&x1=" + domain[0][1] +
-      "&y0=" + domain[1][0] + "&y1=" + domain[1][1] + 
+      "&y0=" + domain[1][0] + "&y1=" + domain[1][1] +
       "&x_step=" + domain[0][2] + "&y_step=" + domain[1][2]) +
       "&expr=" + eqn.replace(/%/g, '%25').replace(/\+/g, '%2B');
   }
   else{
     return ("x0=" + domain[0][0] + "&x1=" + domain[0][1] +
-      "&y0=" + domain[1][0] + "&y1=" + domain[1][1] + 
+      "&y0=" + domain[1][0] + "&y1=" + domain[1][1] +
       "&x_step=" + domain[0][2] + "&y_step=" + domain[1][2]);
   }
 }
@@ -93,7 +122,7 @@ function drawLine(dydx, x, y, length, color){
     var y1 = y - length*Math.sin(theta);
     var y2 = y + length*Math.sin(theta);
     ctx.strokeStyle = color;
-    ctx.strokeWidth = 1;
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x1,y1);
     ctx.lineTo(x2,y2);
@@ -113,8 +142,11 @@ function makeSlopeField(slopes){
     for (var i = 0; i < slopes[j].length; i++){
       x = (w/slopes[j].length)*i;
       y = h - (h/slopes.length)*j;
-      drawLine(slopes[j][i], x, y, 12, colors[Math.floor(Math.random()*colors.length)]);
+      drawLine(slopes[j][i], x, y, 12, colorSchemes[colorIndex].func(slopes[j][i]));
     }
+  }
+  if (axes){
+      drawAxes();
   }
 }
 
@@ -228,7 +260,7 @@ function listEquations(){
     data: "expr=" + currentEquation.replace(/%/g, '%25').replace(/\+/g, '%2B')
   }).done(function(response){
     select = '<select name="eqn" class="eqn-select" size="8" required>';
-    
+
     response.list.forEach(function(eqn){
       select += '<option value="' + eqn + '">' + eqn + '</option><i class="fas fa-times-circle"></i>';
     });
@@ -239,7 +271,7 @@ function listEquations(){
       buttons: [
           $.extend({}, vex.dialog.buttons.YES, { text: 'Apply' }),
           $.extend({}, vex.dialog.buttons.NO, { text: 'Cancel' }),
-          
+
       ],
       callback: function (data) {
         if (data){
@@ -310,8 +342,8 @@ function toggleInspect(elem){
           else if (response.dydx == "inf"){
             dydx = "<span style='font-size: 20px; line-height: 15px'>∞</span>";
           }
-          $('.inspect-tooltip').html("(" + x.toFixed(4) + ", " + 
-            y.toFixed(4) + "):<br> dydx = " + dydx);
+          $('.inspect-tooltip').html("(" + x.toFixed(4) + ", " +
+            y.toFixed(4) + "):<br> dy/dx = " + dydx);
           $('.inspect-tooltip').removeClass('left-tooltip');
           $('.inspect-tooltip').removeClass('right-tooltip');
           $('.inspect-tooltip').removeClass('bottom-tooltip');
@@ -346,4 +378,159 @@ function zoomOut(){
 }
 function zoomIn(){
   setDomain([[domain[0][0]/2, domain[0][1]/2], [domain[1][0]/2, domain[1][1]/2]])
+}
+
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+
+function download(){
+    img = URL.createObjectURL(dataURLtoBlob(canvas.toDataURL()));
+    $("#download").attr({"href": img, "download": currentEquation + ".png"});
+    $("#download")[0].click();
+}
+
+//Getting colors
+function getColor(_, arr){
+    var result = "#";
+    if (!arr){
+        arr = colors[Math.floor(Math.random()*colors.length)];
+    }
+    arr.forEach(function(n){
+        var hex = (parseInt(n*255)).toString(16);
+        if (hex.length == 1){
+            hex = "0" + hex;
+        }
+        result += hex;
+    });
+    return result;
+}
+
+function changeColorScheme(){
+    var inputColors = [];
+    $.each(colorSchemes, function(){
+        var button = '<input type="radio" name="color" value="'+ this.name + '" required';
+        button +=  ((colorIndex === this.name)?' checked':'');
+        button += '><b>' + this.name + '</b>: <em>' + this.description + '</em>';
+        inputColors.push(button);
+    });
+    vex.dialog.open({
+    message: "Color Schemes",
+    input: inputColors.join(' <br> '),
+    buttons: [
+        $.extend({}, vex.dialog.buttons.YES, { text: 'Apply' }),
+        $.extend({}, vex.dialog.buttons.NO, { text: 'Cancel' }),
+    ],
+    callback: function (data) {
+      if (data){
+        colorIndex = data.color;
+        if (currentArray){
+            makeSlopeField(currentArray);
+        }
+      }
+    }
+  });
+}
+
+function toneShift(slope, index){
+    var mult = 1.5/(1 + Math.pow(Math.E, -Math.abs(slope)));
+    var arr = colors[Math.floor(Math.random()*colors.length)].slice();
+    arr[index] = Math.min(1, mult*arr[index])
+    arr[(index + 1) % 3] = Math.min(1, 1.0*arr[(index + 1) % 3]/mult);
+    arr[(index + 2) % 3] = Math.min(1, 1.0*arr[(index + 2) % 3]/mult);
+    return getColor(slope, arr);
+}
+
+function redShift(slope){
+    return toneShift(slope, 0);
+}
+function blueShift(slope){
+    return toneShift(slope, 2);
+}
+function greenShift(slope){
+    return toneShift(slope, 1);
+}
+
+function highlightColor(slope, index){
+    var mult = 1.5/(1 + Math.pow(Math.E, -Math.abs(slope)));
+    var arr = colors[Math.floor(Math.random()*colors.length)].slice();
+    for(i = 0; i < arr.length; i++){
+        arr[i] = Math.min(1, mult*arr[i]);
+    }
+    return getColor(slope, arr);
+}
+
+function dimColor(slope, index){
+    var mult = 1.5/(1 + Math.pow(Math.E, -Math.abs(slope)));
+    var arr = colors[Math.floor(Math.random()*colors.length)].slice();
+    for(i = 0; i < arr.length; i++){
+        arr[i] = Math.min(1, 1.0*arr[i]/mult);
+    }
+    return getColor(slope, arr);
+}
+
+//axes
+function drawAxes(){
+    yAxis = (-domain[0][0])*w/(domain[0][1] - domain[0][0]);
+    xAxis = (-domain[1][0])*h/(domain[1][1] - domain[1][0]);
+
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+    ctx.moveTo(0, xAxis);
+    ctx.lineTo(w, xAxis);
+
+    ctx.moveTo(yAxis, 0);
+    ctx.lineTo(yAxis, h);
+    ctx.stroke();
+
+    labelAxes();
+}
+
+function labelAxes(){
+    ctx.font = '18px Arial';
+
+    ctx.textAlign="start";
+    fillText(0, h/2 - 12, ctx.measureText(domain[0][0].toFixed(2)).width + 3,
+        24, domain[0][0].toFixed(2), 0, h/2 + 6);
+    ctx.textAlign="end";
+    fillText(w - ctx.measureText(domain[0][1].toFixed(2)).width - 3, h/2 - 12,
+        ctx.measureText(domain[0][1].toFixed(2)).width + 3, 24,
+        domain[0][1].toFixed(2), w, h/2 + 6);
+    ctx.textAlign="center";
+    fillText(w/2 - ctx.measureText(domain[1][1].toFixed(2)).width/2 - 3,
+        0, ctx.measureText(domain[1][1].toFixed(2)).width + 6, 24,
+        domain[1][1].toFixed(2), w/2, 18);
+    fillText(w/2 - ctx.measureText(domain[1][0].toFixed(2)).width/2 - 3,
+        h - 24, ctx.measureText(domain[1][0].toFixed(2)).width + 6,
+        24, domain[1][0].toFixed(2), w/2, h - 3);
+}
+
+function fillText(x1, y1, width, height, text, textX, textY){
+    ctx.lineWidth = 1;
+    ctx.fillStyle = "#333";
+    ctx.fillRect(x1, y1, width, height);
+
+    ctx.fillStyle = "#fff";
+    ctx.strokeRect(x1, y1, width, height)
+    ctx.fillText(text, textX, textY);
+}
+
+function toggleAxes(){
+    axes = !axes;
+    if (currentArray){
+        makeSlopeField(currentArray);
+    }
+    else{
+        resetCanvas();
+        if (axes){
+            drawAxes();
+        }
+    }
 }
